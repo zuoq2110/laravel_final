@@ -10,30 +10,23 @@ use Illuminate\Http\Request;
 
 class LogController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $query = Log::with(['ticket', 'user'])
             ->orderBy('created_at', 'desc');
 
-        // Filter by ticket ID if provided
         if ($request->filled('ticket_id')) {
             $query->where('ticket_id', $request->ticket_id);
         }
 
-        // Filter by user ID if provided
         if ($request->filled('user_id')) {
             $query->where('user_id', $request->user_id);
         }
 
-        // Filter by action if provided
         if ($request->filled('action')) {
             $query->where('action', 'like', '%' . $request->action . '%');
         }
 
-        // Filter by date range if provided
         if ($request->filled('date_from')) {
             $query->where('created_at', '>=', $request->date_from);
         }
@@ -44,7 +37,6 @@ class LogController extends Controller
 
         $logs = $query->paginate(20);
 
-        // Get unique ticket IDs and users for filter dropdowns
         $tickets =Ticket::orderBy('title')->get(['id', 'title']);
         $users = User::orderBy('name')->get(['id', 'name']);
         

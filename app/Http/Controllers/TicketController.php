@@ -30,10 +30,6 @@ class TicketController extends Controller
         private CloudinaryService $cloudinaryService
     ) {}
 
-    /**
-     * Display a listing of the user's tickets.
-     */
-
     public function index()
     {
         $user = Auth::user();
@@ -42,10 +38,8 @@ class TicketController extends Controller
             $tickets = $this->ticketRepository->getAllTickets($user->id);
         }
         else if ($user->isAgent()) {
-            // Agents see tickets assigned to them
             $tickets = $this->ticketRepository->getAgentTickets($user->id);
         } else {
-            // Regular users see tickets they created
             $tickets = $this->ticketRepository->getUserTickets($user->id);
         }
 
@@ -54,12 +48,8 @@ class TicketController extends Controller
         return view('tickets.index', compact('tickets'));
     }
 
-    /**
-     * Show the form for creating a new ticket.
-     */
     public function create()
     {
-        // Use policy to authorize the create action
         $this->authorize('create', Ticket::class);
         
         $categories = $this->ticketRepository->getCategories();
@@ -67,12 +57,8 @@ class TicketController extends Controller
         return view('tickets.create', compact('categories', 'labels'));
     }
 
-    /**
-     * Store a newly created ticket in storage.
-     */
     public function store(Request $request)
     {
-        // Use policy to authorize the create action
         $this->authorize('create', Ticket::class);
         
         $validated = $request->validate([
@@ -86,10 +72,9 @@ class TicketController extends Controller
             'attachments.*' => 'file|mimes:jpeg,png,jpg,gif,pdf,doc,docx,txt,zip,rar|max:10240' // Max 10MB per file
         ]);
 
-        // Create the ticket
         $ticket = $this->createTicketAction->execute($validated);
 
-        // Handle file uploads if any
+
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
                 try {
@@ -117,12 +102,8 @@ class TicketController extends Controller
             ->with('success', 'Ticket created successfully!');
     }
 
-    /**
-     * Display the specified ticket.
-     */
     public function show(Ticket $ticket)
     {
-        // Use policy to authorize the view action
         $this->authorize('view', $ticket);
 
         $ticket = $this->getUserTicketAction->execute($ticket->id);
@@ -131,7 +112,6 @@ class TicketController extends Controller
             abort(404, 'Ticket not found.');
         }
 
-        // Get agents for assignment dropdown (only for admin)
         // $agents = auth()->user()->isAdmin() ? User::where('role', 'agent')->get() : collect();
         $agents = null;
         if(Auth::user()->isAdmin()){
@@ -145,7 +125,6 @@ class TicketController extends Controller
     {
         $ticket = $this->getUserTicketAction->execute($ticket->id);
         
-        // Use policy to authorize the update action
         $this->authorize('update', $ticket);
 
         $categories = $this->ticketRepository->getCategories();
@@ -157,7 +136,6 @@ class TicketController extends Controller
     {
         $ticket = $this->ticketRepository->getTicketById($ticketId);
         
-        // Use policy to authorize the update action
         $this->authorize('update', $ticket);
         
         $validated = $request->validate([
@@ -186,13 +164,9 @@ class TicketController extends Controller
         return redirect()->route('tickets.index')
         ->with('success', 'Ticket deleted successfully!');
     }
-
-    /**
-     * Store a new comment for the ticket.
-     */
+    
     public function storeComment(Request $request, Ticket $ticket)
     {
-        // Use CommentPolicy to check if user can create comment on this ticket
         $this->authorize('createOnTicket', [Comment::class, $ticket]);
 
         $validated = $request->validate([
@@ -258,9 +232,6 @@ class TicketController extends Controller
 
     }
 
-    /**
-     * Download ticket attachment
-     */
     public function downloadAttachment(TicketAttachment $attachment)
     {
         // Check if user can view the ticket that owns this attachment
