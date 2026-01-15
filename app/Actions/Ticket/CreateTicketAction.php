@@ -40,15 +40,11 @@ class CreateTicketAction
             'description' => "Ticket created successfully!",
         ]);
 
-        // Send email notifications to all admin users
         $this->sendAdminNotifications($ticket);
 
         return $ticket;
     }
 
-    /**
-     * Send email notifications to all admin users
-     */
     private function sendAdminNotifications(Ticket $ticket): void
     {
         $adminUsers = User::where('role', 'admin')->get();

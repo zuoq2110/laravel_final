@@ -11,7 +11,6 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Get ticket statistics
         $ticketStats = [
             'total' => Ticket::count(),
             'open' => Ticket::where('status', 'open')->count(),
@@ -19,7 +18,6 @@ class DashboardController extends Controller
             'closed' => Ticket::where('status', 'closed')->count(),
         ];
 
-        // Get additional admin statistics
         $additionalStats = [
             'total_users' => User::where('role', 'user')->count(),
             'total_agents' => User::where('role', 'agent')->count(),
