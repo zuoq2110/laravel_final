@@ -2,8 +2,10 @@
 
 namespace App\Actions\Ticket;
 
+use App\Events\TicketAssignedEvent;
 use App\Models\Log;
 use App\Models\Ticket;
+use App\Models\User;
 use App\Repositories\LogRepositoryInterface;
 use App\Repositories\TicketRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +22,7 @@ class AssignTicketAction
     {
         
         $currentAgent = $ticket->agent;
-        // dd($currentAgent);
+        $assigner = User::find($userId);
         
         if($agentId){
             $agent = $this->ticketRepository->findAgent($agentId);
@@ -43,6 +45,25 @@ class AssignTicketAction
             'action'    => 'assignment_changed',
             'description' => $message,
         ]);
+
+        // Send notification when assigning to an agent
+        if ($agentId && $agent && $assigner) {
+            $updatedTicket = $this->ticketRepository->getTicketById($ticket->id);
+            
+            // Use SSE notification system (handles both database + cache)
+            \App\Http\Controllers\NotificationController::handleTicketAssigned(
+                $updatedTicket->id,
+                $agent->id,
+                $assigner->id,
+                [
+                    'title' => $updatedTicket->title,
+                    'status' => $updatedTicket->status,
+                    'priority' => $updatedTicket->priority,
+                    'description' => $updatedTicket->description
+                ]
+            );
+        }
+
         return $agentId ? 'Ticket assigned successfully!' : 'Ticket unassigned successfully!';
     }
 }
