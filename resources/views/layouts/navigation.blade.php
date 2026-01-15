@@ -51,36 +51,58 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
-
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
+                <!-- Notification Badge -->
+                <div class="relative mr-4">
+                    <svg onclick="toggleNotificationPanel()" class="w-6 h-6 text-gray-600 hover:text-gray-800 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-3.5-7H15V8a5 5 0 00-10 0v2H1.5L5 17h5m-5-7V8a7 7 0 1114 0v2" />
+                    </svg>
+                    <span id="notification-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold" style="display: none;">0</span>
+                    
+                    <!-- Notification Panel -->
+                    <div id="notification-panel" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50 hidden">
+                        <div class="p-4 border-b">
+                            <h3 class="text-lg font-semibold">Thông báo</h3>
+                        </div>
+                        <div id="notification-list" class="max-h-96 overflow-y-auto">
+                            <div class="p-4 text-gray-500 text-center">
+                                Không có thông báo mới
                             </div>
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
+                        </div>
+                        <div class="p-3 border-t text-center">
+                            <button onclick="clearAllNotifications()" class="text-sm text-blue-600 hover:text-blue-800">
+                                Xóa tất cả
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+            
+                
+                <!-- Simple JavaScript Dropdown -->
+                <div class="relative">
+                    <button onclick="toggleUserDropdown()" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150" type="button">
+                        <div>{{ Auth::user()->name }}</div>
+                        <div class="ms-1">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </button>
+                    
+                    <div id="user-dropdown" class="absolute right-0 z-50 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden">
+                        <div class="py-1">
+                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                {{ __('Profile') }}
+                            </a>
+                            <form method="POST" action="{{ route('logout') }}" id="logout-form" class="block">
+                                @csrf
+                                <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    {{ __('Log Out') }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Hamburger -->
@@ -135,12 +157,11 @@
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('logout') }}" id="logout-form-mobile">
                     @csrf
 
-                    <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
+                    <x-responsive-nav-link href="#"
+                            onclick="event.preventDefault(); document.getElementById('logout-form-mobile').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>
                 </form>
